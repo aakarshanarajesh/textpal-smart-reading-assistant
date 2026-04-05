@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Reading Assistant - TextPal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">📚 TextPal</h1>
+                <p class="app-subtitle">Smart Reading Assistant for Better Comprehension</p>
+                <div class="font-size-controls">
+                    <label for="font-size-select">Font Size:</label>
+                    <select id="font-size-select" class="control-select">
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
+                        <option value="xlarge">Extra Large</option>
+                    </select>
+                    <label for="font-family-select">Font:</label>
+                    <select id="font-family-select" class="control-select">
+                        <option value="default">Default</option>
+                        <option value="dyslexia">Dyslexia-Friendly (OpenDyslexic)</option>
+                        <option value="serif">Serif</option>
+                        <option value="sans">Sans-Serif</option>
+                        <option value="monospace">Monospace</option>
+                    </select>
+                    <button id="dark-mode-toggle" class="btn-icon" title="Toggle Dark Mode">🌙</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Left Panel: File Upload & Controls -->
+            <aside class="sidebar">
+                <section class="upload-section">
+                    <h2>📁 Upload Document</h2>
+                    <div class="file-upload-area" id="file-upload-area">
+                        <input type="file" id="file-input" accept=".pdf,.txt" hidden>
+                        <p>Drag & drop your file here</p>
+                        <p class="upload-hint">or click to select</p>
+                        <p class="upload-formats">Supported: PDF, TXT</p>
+                    </div>
+                    <div id="file-info" class="file-info" style="display: none;">
+                        <p><strong>File:</strong> <span id="current-filename"></span></p>
+                        <p><strong>Words:</strong> <span id="word-count">0</span></p>
+                        <p><strong>Characters:</strong> <span id="char-count">0</span></p>
+                    </div>
+                </section>
+
+                <!-- Action Buttons -->
+                <section class="controls-section">
+                    <h2>🎯 Quick Actions</h2>
+                    <div class="button-group">
+                        <button id="speak-btn" class="btn btn-primary" disabled>
+                            🔊 Read Aloud
+                        </button>
+                        <button id="stop-speak-btn" class="btn btn-secondary" disabled>
+                            ⏹️ Stop
+                        </button>
+                    </div>
+                    <div class="button-group">
+                        <button id="summarize-btn" class="btn btn-info" disabled>
+                            📝 Summarize
+                        </button>
+                        <button id="analyze-btn" class="btn btn-info" disabled>
+                            📊 Analyze Difficulty
+                        </button>
+                    </div>
+                    <div class="button-group">
+                        <button id="keywords-btn" class="btn btn-info" disabled>
+                            🔑 Extract Keywords
+                        </button>
+                        <button id="translate-btn" class="btn btn-info" disabled>
+                            🌐 Translate to Tamil
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Chatbot Section -->
+                <section class="chatbot-section">
+                    <h2>💬 Ask Questions</h2>
+                    <div class="chat-container">
+                        <div id="chat-output" class="chat-output"></div>
+                    </div>
+                    <div class="chat-input-group">
+                        <input type="text" id="question-input" placeholder="Ask a question about the text..." disabled>
+                        <button id="ask-btn" class="btn btn-small" disabled>Ask</button>
+                        <button id="clear-chat-btn" class="btn btn-small" disabled>Clear</button>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Right Panel: Text Display -->
+            <section class="content-area">
+                <div class="text-container">
+                    <h2>📖 Document Content</h2>
+                    <div id="text-display" class="text-display">
+                        <p class="placeholder">Upload a document to get started...</p>
+                    </div>
+                </div>
+
+                <!-- Analysis Results Panel -->
+                <div id="analysis-panel" class="analysis-panel" style="display: none;">
+                    <h3>📊 Analysis Results</h3>
+                    
+                    <!-- Difficulty Analysis -->
+                    <div id="difficulty-result" class="result-section" style="display: none;">
+                        <h4>Reading Difficulty</h4>
+                        <div class="difficulty-box">
+                            <p><strong>Flesch Reading Ease Score:</strong> <span id="difficulty-score">0</span>/100</p>
+                            <p><strong>Difficulty Level:</strong> <span id="difficulty-level">Unknown</span></p>
+                            <p><strong>Sentences:</strong> <span id="sentence-count">0</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Summary Result -->
+                    <div id="summary-result" class="result-section" style="display: none;">
+                        <h4>📝 Summary</h4>
+                        <div id="summary-text" class="result-box"></div>
+                    </div>
+
+                    <!-- Keywords Result -->
+                    <div id="keywords-result" class="result-section" style="display: none;">
+                        <h4>🔑 Key Topics</h4>
+                        <div id="keywords-list" class="keywords-box"></div>
+                    </div>
+
+                    <!-- Translation Result -->
+                    <div id="translation-result" class="result-section" style="display: none;">
+                        <h4>🌐 Translation</h4>
+                        <p><strong>Original (English):</strong></p>
+                        <div id="translation-original" class="result-box"></div>
+                        <p><strong>Translated (Tamil):</strong></p>
+                        <div id="translation-tamil" class="result-box"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="loading-spinner" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
