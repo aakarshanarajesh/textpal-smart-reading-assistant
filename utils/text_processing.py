@@ -5,14 +5,27 @@ Handles text summarization, difficulty analysis, and keyword extraction
 
 import re
 from collections import Counter
-from transformers import pipeline
 
 
-# Initialize summarization pipeline (using BART model)
-try:
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=-1)
-except:
-    summarizer = None
+summarizer = None
+summarizer_loaded = False
+
+
+def get_summarizer():
+    """Load the summarization model only when summarization is requested."""
+    global summarizer, summarizer_loaded
+
+    if summarizer_loaded:
+        return summarizer
+
+    summarizer_loaded = True
+    try:
+        from transformers import pipeline
+        summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=-1)
+    except Exception:
+        summarizer = None
+
+    return summarizer
 
 
 def calculate_flesch_reading_ease(text):
@@ -120,7 +133,9 @@ def summarize_text(text, max_length=150, min_length=50):
     Returns:
         str: Summarized text
     """
-    if not summarizer:
+    model = get_summarizer()
+
+    if not model:
         # Fallback to simple extractive summarization if model not available
         return simple_extractive_summary(text)
     
@@ -130,7 +145,7 @@ def summarize_text(text, max_length=150, min_length=50):
             text = ' '.join(text.split()[:1024])
         
         # Use transformer summarizer
-        summary = summarizer(text, max_length=max_length, min_length=min_length, do_sample=False)
+        summary = model(text, max_length=max_length, min_length=min_length, do_sample=False)
         return summary[0]['summary_text']
     except:
         # Fallback to simple summarization

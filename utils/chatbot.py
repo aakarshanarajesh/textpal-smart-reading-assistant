@@ -3,14 +3,26 @@ Chatbot Module
 Simple chatbot for handling user queries
 """
 
-from transformers import pipeline
+
+qa_pipeline = None
+qa_pipeline_loaded = False
 
 
-# Initialize QA pipeline
-try:
-    qa_pipeline = pipeline("question-answering", model="distilbert-base-cased-distilled-squad", device=-1)
-except:
-    qa_pipeline = None
+def get_qa_pipeline():
+    """Load the QA model only when a question is asked."""
+    global qa_pipeline, qa_pipeline_loaded
+
+    if qa_pipeline_loaded:
+        return qa_pipeline
+
+    qa_pipeline_loaded = True
+    try:
+        from transformers import pipeline
+        qa_pipeline = pipeline("question-answering", model="distilbert-base-cased-distilled-squad", device=-1)
+    except Exception:
+        qa_pipeline = None
+
+    return qa_pipeline
 
 
 class SimpleChatbot:
@@ -46,12 +58,14 @@ class SimpleChatbot:
         if not self.context:
             return "Please upload a document first."
         
-        if not qa_pipeline:
+        model = get_qa_pipeline()
+
+        if not model:
             return "QA service unavailable. Please check dependencies."
         
         try:
             # Use QA pipeline to answer question
-            result = qa_pipeline(question=question, context=self.context)
+            result = model(question=question, context=self.context)
             answer = result['answer']
             confidence = result['score']
             

@@ -3,17 +3,27 @@ Translation Module
 Handles translation between Tamil and English
 """
 
-from transformers import pipeline
-import requests
+
+en_to_tamil = None
+tamil_to_en = None
+translation_models_loaded = False
 
 
-# Initialize translation pipeline
-try:
-    en_to_tamil = pipeline("translation_en_to_ta", model="Helsinki-NLP/opus-mt-en-ta", device=-1)
-    tamil_to_en = pipeline("translation_ta_to_en", model="Helsinki-NLP/opus-mt-ta-en", device=-1)
-except:
-    en_to_tamil = None
-    tamil_to_en = None
+def load_translation_models():
+    """Load translation models only when translation is requested."""
+    global en_to_tamil, tamil_to_en, translation_models_loaded
+
+    if translation_models_loaded:
+        return
+
+    translation_models_loaded = True
+    try:
+        from transformers import pipeline
+        en_to_tamil = pipeline("translation_en_to_ta", model="Helsinki-NLP/opus-mt-en-ta", device=-1)
+        tamil_to_en = pipeline("translation_ta_to_en", model="Helsinki-NLP/opus-mt-ta-en", device=-1)
+    except Exception:
+        en_to_tamil = None
+        tamil_to_en = None
 
 
 def translate_to_tamil(text):
@@ -26,6 +36,8 @@ def translate_to_tamil(text):
     Returns:
         str: Tamil translation
     """
+    load_translation_models()
+
     if not en_to_tamil:
         return "Translation service unavailable. Please install required models."
     
@@ -52,6 +64,8 @@ def translate_to_english(text):
     Returns:
         str: English translation
     """
+    load_translation_models()
+
     if not tamil_to_en:
         return "Translation service unavailable. Please install required models."
     
