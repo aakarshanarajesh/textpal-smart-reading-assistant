@@ -10,25 +10,34 @@
     <div class="container">
         <header class="header">
             <div class="header-content">
-                <h1 class="app-title">TextPal</h1>
-                <p class="app-subtitle">Smart Reading Assistant for Better Comprehension</p>
-                <div class="font-size-controls">
-                    <label for="font-size-select">Font Size:</label>
-                    <select id="font-size-select" class="control-select">
-                        <option value="small">Small</option>
-                        <option value="medium" selected>Medium</option>
-                        <option value="large">Large</option>
-                        <option value="xlarge">Extra Large</option>
-                    </select>
-                    <label for="font-family-select">Font:</label>
-                    <select id="font-family-select" class="control-select">
-                        <option value="default">Default</option>
-                        <option value="dyslexia">Dyslexia-Friendly (OpenDyslexic)</option>
-                        <option value="serif">Serif</option>
-                        <option value="sans">Sans-Serif</option>
-                        <option value="monospace">Monospace</option>
-                    </select>
-                    <button id="dark-mode-toggle" class="btn-icon" title="Toggle Dark Mode">Dark</button>
+                <div class="brand-block">
+                    <div class="brand-mark">T</div>
+                    <div>
+                        <h1 class="app-title">TextPal</h1>
+                        <p class="app-subtitle">A calmer workspace for reading, summarizing, and asking questions.</p>
+                    </div>
+                </div>
+                <div class="reader-controls" aria-label="Reader controls">
+                    <div class="control-field">
+                        <label for="font-size-select">Size</label>
+                        <select id="font-size-select" class="control-select">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                            <option value="xlarge">Extra Large</option>
+                        </select>
+                    </div>
+                    <div class="control-field">
+                        <label for="font-family-select">Font</label>
+                        <select id="font-family-select" class="control-select">
+                            <option value="default">Default</option>
+                            <option value="dyslexia">Dyslexia-Friendly</option>
+                            <option value="serif">Serif</option>
+                            <option value="sans">Sans-Serif</option>
+                            <option value="monospace">Monospace</option>
+                        </select>
+                    </div>
+                    <button id="dark-mode-toggle" class="btn-icon" title="Toggle dark mode" aria-label="Toggle dark mode">Dark</button>
                 </div>
             </div>
         </header>
@@ -39,7 +48,8 @@
                     <h2>Upload Document</h2>
                     <div class="file-upload-area" id="file-upload-area">
                         <input type="file" id="file-input" accept=".pdf,.txt" hidden>
-                        <p>Drag and drop your file here</p>
+                        <div class="upload-icon" aria-hidden="true">PDF</div>
+                        <p>Drop a PDF or text file</p>
                         <p class="upload-hint">or click to select</p>
                         <p class="upload-formats">Supported: PDF, TXT</p>
                     </div>
@@ -81,9 +91,14 @@
 
             <section class="content-area">
                 <div class="text-container">
-                    <h2>Document Content</h2>
+                    <div class="content-heading">
+                        <div>
+                            <h2>Document Content</h2>
+                            <p>Readable text appears here after upload.</p>
+                        </div>
+                    </div>
                     <div id="text-display" class="text-display">
-                        <p class="placeholder">Upload a document to get started...</p>
+                        <p class="placeholder">Upload a document to get started.</p>
                     </div>
                 </div>
 
