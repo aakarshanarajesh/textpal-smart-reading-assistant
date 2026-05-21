@@ -6,6 +6,7 @@ Simple chatbot for handling user queries
 import re
 import os
 from collections import Counter
+from utils.ai_service import ask_ai
 
 qa_pipeline = None
 qa_pipeline_loaded = False
@@ -63,6 +64,15 @@ class SimpleChatbot:
         """
         if not self.context:
             return "Please upload a document first."
+
+        ai_answer = self.ask_with_ai(question)
+        if ai_answer:
+            self.conversation_history.append({
+                'question': question,
+                'answer': ai_answer,
+                'confidence': None
+            })
+            return ai_answer
         
         model = get_qa_pipeline()
 
@@ -91,6 +101,20 @@ class SimpleChatbot:
             return answer
         except Exception as e:
             return self.simple_answer(question)
+
+    def ask_with_ai(self, question):
+        try:
+            return ask_ai(
+                "You are TextPal, an AI reading assistant. Answer only from the provided document. If the answer is not in the document, say that clearly.",
+                (
+                    f"Document:\n{self.context[:8000]}\n\n"
+                    f"Question: {question}\n\n"
+                    "Answer in one or two clear sentences."
+                ),
+                max_tokens=220
+            )
+        except Exception:
+            return None
 
     def simple_answer(self, question):
         """Find the most relevant sentence when the ML QA model is unavailable."""

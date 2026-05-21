@@ -396,14 +396,56 @@ async function askQuestion() {
             })
         });
 
-        // Add bot response to chat
+        if (isUnavailableQaAnswer(data.answer)) {
+            addChatMessage(answerQuestionLocally(question), 'bot');
+            return;
+        }
+
         addChatMessage(data.answer, 'bot');
     } catch (error) {
         console.error('Question error:', error);
-        addChatMessage('Sorry, I could not process your question: ' + error.message, 'bot');
+        addChatMessage(answerQuestionLocally(question), 'bot');
     } finally {
         showLoading(false);
     }
+}
+
+function isUnavailableQaAnswer(answer) {
+    return !answer || answer.toLowerCase().includes('qa service unavailable');
+}
+
+function answerQuestionLocally(question) {
+    if (!currentText) {
+        return 'Please upload a document first.';
+    }
+
+    const sentences = currentText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
+    const cleanedSentences = sentences.map(sentence => sentence.trim()).filter(Boolean);
+
+    if (question.toLowerCase().includes('name')) {
+        const nameMatch = currentText.match(/\b(?:name is|named|I am|my name is)\s+([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){0,2})/);
+        if (nameMatch) {
+            return nameMatch[1];
+        }
+    }
+
+    const ignoredWords = new Set(['what', 'when', 'where', 'which', 'about', 'does', 'this', 'that', 'with', 'from', 'have', 'name']);
+    const questionWords = (question.toLowerCase().match(/\b[a-z]{3,}\b/g) || [])
+        .filter(word => !ignoredWords.has(word));
+
+    let bestSentence = '';
+    let bestScore = 0;
+
+    cleanedSentences.forEach(sentence => {
+        const lowerSentence = sentence.toLowerCase();
+        const score = questionWords.reduce((total, word) => total + (lowerSentence.includes(word) ? 1 : 0), 0);
+        if (score > bestScore) {
+            bestScore = score;
+            bestSentence = sentence;
+        }
+    });
+
+    return bestSentence || 'I could not find a direct answer in the document. Try asking with words that appear in the text.';
 }
 
 function addChatMessage(message, sender) {

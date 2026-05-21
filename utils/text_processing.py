@@ -4,7 +4,9 @@ Handles text summarization, difficulty analysis, and keyword extraction
 """
 
 import re
+import os
 from collections import Counter
+from utils.ai_service import ask_ai
 
 
 summarizer = None
@@ -14,6 +16,9 @@ summarizer_loaded = False
 def get_summarizer():
     """Load the summarization model only when summarization is requested."""
     global summarizer, summarizer_loaded
+
+    if os.getenv('ENABLE_LOCAL_TRANSFORMERS', '').lower() not in {'1', 'true', 'yes'}:
+        return None
 
     if summarizer_loaded:
         return summarizer
@@ -133,6 +138,10 @@ def summarize_text(text, max_length=150, min_length=50):
     Returns:
         str: Summarized text
     """
+    ai_summary = summarize_with_ai(text, max_length=max_length)
+    if ai_summary:
+        return ai_summary
+
     model = get_summarizer()
 
     if not model:
@@ -150,6 +159,24 @@ def summarize_text(text, max_length=150, min_length=50):
     except:
         # Fallback to simple summarization
         return simple_extractive_summary(text)
+
+
+def summarize_with_ai(text, max_length=150):
+    words = text.split()
+    source_text = ' '.join(words[:2500])
+
+    try:
+        return ask_ai(
+            "You are TextPal, an AI reading assistant. Summarize documents clearly and faithfully.",
+            (
+                "Create a concise student-friendly summary of this document. "
+                f"Keep it around {max_length} words and include the most important points.\n\n"
+                f"Document:\n{source_text}"
+            ),
+            max_tokens=420
+        )
+    except Exception:
+        return None
 
 
 def simple_extractive_summary(text, num_sentences=3):
