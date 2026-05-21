@@ -1,3 +1,9 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://textpal-smart-reading-assistant.onrender.com/api/$1"
+    }
+  ]
 }
