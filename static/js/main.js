@@ -13,6 +13,7 @@ let speechSynthesis = window.speechSynthesis;
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5000/api'
     : '/api';
+const REQUEST_TIMEOUT_MS = 45000;
 
 // ============================================
 // DOM Elements
@@ -143,16 +144,10 @@ async function uploadFile(file) {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch(`${API_BASE}/upload`, {
+        const data = await fetchJson(`${API_BASE}/upload`, {
             method: 'POST',
             body: formData
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Upload failed');
-        }
 
         // Store text
         currentText = data.text;
@@ -241,7 +236,7 @@ async function summarizeText() {
     analysisPanel.style.display = 'block';
 
     try {
-        const response = await fetch(`${API_BASE}/summarize`, {
+        const data = await fetchJson(`${API_BASE}/summarize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -252,12 +247,6 @@ async function summarizeText() {
                 min_length: 50
             })
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Summarization failed');
-        }
 
         // Display summary
         document.getElementById('summary-text').textContent = data.summary;
@@ -282,7 +271,7 @@ async function analyzeDifficulty() {
     analysisPanel.style.display = 'block';
 
     try {
-        const response = await fetch(`${API_BASE}/analyze-difficulty`, {
+        const data = await fetchJson(`${API_BASE}/analyze-difficulty`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -291,12 +280,6 @@ async function analyzeDifficulty() {
                 text: currentText
             })
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Analysis failed');
-        }
 
         // Display difficulty analysis
         document.getElementById('difficulty-score').textContent = data.score;
@@ -323,7 +306,7 @@ async function extractKeywords() {
     analysisPanel.style.display = 'block';
 
     try {
-        const response = await fetch(`${API_BASE}/extract-keywords`, {
+        const data = await fetchJson(`${API_BASE}/extract-keywords`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -333,12 +316,6 @@ async function extractKeywords() {
                 num_keywords: 10
             })
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Keyword extraction failed');
-        }
 
         // Display keywords
         const keywordsList = document.getElementById('keywords-list');
@@ -366,7 +343,7 @@ async function translateText() {
     analysisPanel.style.display = 'block';
 
     try {
-        const response = await fetch(`${API_BASE}/translate`, {
+        const data = await fetchJson(`${API_BASE}/translate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -376,12 +353,6 @@ async function translateText() {
                 target_language: 'ta'  // Translate to Tamil
             })
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Translation failed');
-        }
 
         // Display translation
         document.getElementById('translation-original').textContent = data.original_text;
@@ -421,7 +392,7 @@ async function askQuestion() {
     showLoading(true);
 
     try {
-        const response = await fetch(`${API_BASE}/ask-question`, {
+        const data = await fetchJson(`${API_BASE}/ask-question`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -430,12 +401,6 @@ async function askQuestion() {
                 question: question
             })
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Question processing failed');
-        }
 
         // Add bot response to chat
         addChatMessage(data.answer, 'bot');
@@ -457,14 +422,12 @@ function addChatMessage(message, sender) {
 
 async function clearChat() {
     try {
-        const response = await fetch(`${API_BASE}/clear-chat`, {
+        await fetchJson(`${API_BASE}/clear-chat`, {
             method: 'POST'
         });
 
-        if (response.ok) {
-            chatOutput.innerHTML = '';
-            showToast('Chat history cleared', 'success');
-        }
+        chatOutput.innerHTML = '';
+        showToast('Chat history cleared', 'success');
     } catch (error) {
         console.error('Clear chat error:', error);
         showToast('Error clearing chat', 'error');
@@ -488,6 +451,38 @@ function enableButtons(enable) {
 
 function showLoading(show) {
     loadingSpinner.style.display = show ? 'flex' : 'none';
+}
+
+async function fetchJson(url, options = {}) {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        const contentType = response.headers.get('content-type') || '';
+        const text = await response.text();
+        const data = contentType.includes('application/json') && text ? JSON.parse(text) : null;
+
+        if (!response.ok) {
+            throw new Error(data?.error || `Request failed with status ${response.status}`);
+        }
+
+        if (!data) {
+            throw new Error('Server returned an unexpected response. Please check the backend deployment.');
+        }
+
+        return data;
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            throw new Error('The server is taking too long to respond. Please try again in a moment.');
+        }
+        throw error;
+    } finally {
+        window.clearTimeout(timeoutId);
+    }
 }
 
 function showToast(message, type = 'info') {
