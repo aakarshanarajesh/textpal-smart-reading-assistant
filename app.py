@@ -149,9 +149,11 @@ def summarize():
         return jsonify({'error': 'No text provided'}), 400
     
     try:
-        summary = summarize_text(text, max_length=max_length, min_length=min_length)
+        result = summarize_text(text, max_length=max_length, min_length=min_length)
+        summary = result['summary']
         return jsonify({
             'summary': summary,
+            'method': result['method'],
             'original_length': len(text),
             'summary_length': len(summary)
         }), 200

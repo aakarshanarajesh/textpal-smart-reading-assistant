@@ -140,13 +140,19 @@ def summarize_text(text, max_length=150, min_length=50):
     """
     ai_summary = summarize_with_ai(text, max_length=max_length)
     if ai_summary:
-        return ai_summary
+        return {
+            "summary": ai_summary,
+            "method": "AI-powered summarization"
+        }
 
     model = get_summarizer()
 
     if not model:
         # Fallback to simple extractive summarization if model not available
-        return simple_extractive_summary(text)
+        return {
+            "summary": simple_extractive_summary(text),
+            "method": "NLP extractive summarization"
+        }
     
     try:
         # If text is too long, truncate it for the model
@@ -155,10 +161,16 @@ def summarize_text(text, max_length=150, min_length=50):
         
         # Use transformer summarizer
         summary = model(text, max_length=max_length, min_length=min_length, do_sample=False)
-        return summary[0]['summary_text']
+        return {
+            "summary": summary[0]['summary_text'],
+            "method": "Local transformer summarization"
+        }
     except:
         # Fallback to simple summarization
-        return simple_extractive_summary(text)
+        return {
+            "summary": simple_extractive_summary(text),
+            "method": "NLP extractive summarization"
+        }
 
 
 def summarize_with_ai(text, max_length=150):

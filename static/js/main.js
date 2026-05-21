@@ -277,17 +277,57 @@ async function summarizeText() {
             })
         });
 
-        // Display summary
-        document.getElementById('summary-text').textContent = data.summary;
-        document.getElementById('summary-result').style.display = 'block';
+        displaySummary(data.summary, data.method || 'AI/NLP summarization');
 
-        showToast('Summary generated successfully!', 'success');
+        showToast(`${data.method || 'Summary'} completed successfully!`, 'success');
     } catch (error) {
         console.error('Summarization error:', error);
-        showToast('Error summarizing text: ' + error.message, 'error');
+        const fallbackSummary = summarizeLocally(currentText);
+        displaySummary(fallbackSummary, 'Browser NLP extractive summarization');
+        showToast('Backend unavailable, so a browser NLP summary was generated.', 'info');
     } finally {
         showLoading(false);
     }
+}
+
+function displaySummary(summary, method) {
+    document.getElementById('summary-text').textContent = `${method}\n\n${summary}`;
+    document.getElementById('summary-result').style.display = 'block';
+}
+
+function summarizeLocally(text, maxSentences = 4) {
+    const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)
+        ?.map(sentence => sentence.trim())
+        .filter(Boolean) || [];
+
+    if (sentences.length <= maxSentences) {
+        return text.slice(0, 900);
+    }
+
+    const stopWords = new Set([
+        'the', 'and', 'for', 'are', 'but', 'not', 'you', 'your', 'with', 'from',
+        'that', 'this', 'was', 'were', 'have', 'has', 'had', 'they', 'their',
+        'will', 'would', 'could', 'should', 'about', 'into', 'than', 'then'
+    ]);
+    const words = (text.toLowerCase().match(/\b[a-z]{3,}\b/g) || [])
+        .filter(word => !stopWords.has(word));
+    const frequencies = words.reduce((counts, word) => {
+        counts[word] = (counts[word] || 0) + 1;
+        return counts;
+    }, {});
+
+    const ranked = sentences.map((sentence, index) => {
+        const sentenceWords = sentence.toLowerCase().match(/\b[a-z]{3,}\b/g) || [];
+        const score = sentenceWords.reduce((total, word) => total + (frequencies[word] || 0), 0);
+        return { index, sentence, score };
+    });
+
+    return ranked
+        .sort((a, b) => b.score - a.score)
+        .slice(0, maxSentences)
+        .sort((a, b) => a.index - b.index)
+        .map(item => item.sentence)
+        .join(' ');
 }
 
 async function analyzeDifficulty() {

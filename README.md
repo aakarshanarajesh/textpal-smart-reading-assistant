@@ -1,16 +1,16 @@
 # Smart Reading Assistant (TextPal)
 
-Smart Reading Assistant, also called TextPal, is a Flask web application for reading support, document understanding, and accessibility. Users can upload PDF or TXT files, view extracted text, listen with browser text-to-speech, generate summaries, analyze reading difficulty, extract keywords, translate English text to Tamil, and ask questions about the uploaded document.
+Smart Reading Assistant, also called TextPal, is a Flask web application for reading support, document understanding, and accessibility. Users can upload PDF or TXT files, view extracted text, listen with browser text-to-speech, generate summaries, analyze reading difficulty, extract keywords, and ask questions about the uploaded document.
 
 ## Features
 
 - Upload and extract text from PDF and TXT files.
 - Display document text in a clean, responsive reading interface.
 - Read content aloud with browser text-to-speech controls.
-- Generate AI summaries with Hugging Face Transformers.
+- Generate AI-powered summaries when `OPENAI_API_KEY` is configured.
+- Fall back to lightweight NLP extractive summarization when AI is unavailable.
 - Analyze readability with the Flesch Reading Ease score.
 - Extract important keywords from uploaded text.
-- Translate English text to Tamil.
 - Ask document-based questions through a simple QA chatbot.
 - Customize font family, font size, and dark mode.
 - Use the app on desktop, tablet, and mobile screens.
@@ -18,7 +18,7 @@ Smart Reading Assistant, also called TextPal, is a Flask web application for rea
 ## Tech Stack
 
 - Backend: Flask, Flask-CORS, Werkzeug
-- AI and NLP: Transformers, PyTorch
+- AI and NLP: OpenAI-compatible chat completions, lightweight NLP fallbacks
 - File processing: PyPDF2
 - Frontend: HTML, CSS, JavaScript
 - Browser feature: Web Speech API
@@ -56,6 +56,24 @@ smart_textpal/
 ```
 
 ## Local Setup
+
+### AI/NLP features
+
+TextPal uses AI-powered summarization and document Q&A when `OPENAI_API_KEY` is configured on the backend. Without a key, it falls back to lightweight NLP extractive summarization and document sentence matching so uploads and summaries still work.
+
+Render environment variables:
+
+```env
+OPENAI_API_KEY=your_api_key_here
+OPENAI_MODEL=gpt-4o-mini
+```
+
+Optional local transformer mode:
+
+```env
+ENABLE_LOCAL_TRANSFORMERS=true
+ENABLE_ML_QA=true
+```
 
 ### Prerequisites
 
