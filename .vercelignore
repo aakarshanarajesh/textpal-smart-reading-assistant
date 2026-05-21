@@ -1,0 +1,31 @@
+# Vercel hosts only the static frontend.
+# The Python backend runs on Render and is reached through vercel.json rewrites.
+
+app.py
+check_system.py
+config.py
+setup.py
+test_textpal.py
+
+requirements.txt
+requirements-dev.txt
+runtime.txt
+Procfile
+Dockerfile
+docker-compose.yml
+
+utils/
+templates/
+uploads/
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+.env
+.env.*
+!.env.example
+
+CONTRIBUTING.md
+PROJECT_INVENTORY.md
+QUICKSTART.md
