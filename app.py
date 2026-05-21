@@ -16,7 +16,6 @@ from utils.text_processing import (
     summarize_text,
     extract_keywords
 )
-from utils.translation import translate_to_tamil, translate_to_english, detect_language
 from utils.chatbot import SimpleChatbot
 
 
@@ -180,62 +179,6 @@ def get_keywords():
         return jsonify({'keywords': keywords}), 200
     except Exception as e:
         return jsonify({'error': f'Error extracting keywords: {str(e)}'}), 500
-
-
-@app.route('/api/translate', methods=['POST'])
-def translate():
-    """
-    Translate text between English and Tamil
-    
-    Returns:
-        JSON: Translated text
-    """
-    data = request.get_json()
-    text = data.get('text', '')
-    target_language = data.get('target_language', 'ta')
-    
-    if not text:
-        return jsonify({'error': 'No text provided'}), 400
-    
-    try:
-        if target_language == 'ta':
-            translated = translate_to_tamil(text)
-        elif target_language == 'en':
-            translated = translate_to_english(text)
-        else:
-            return jsonify({'error': 'Unsupported language'}), 400
-        
-        return jsonify({
-            'original_text': text,
-            'translated_text': translated,
-            'target_language': target_language
-        }), 200
-    
-    except Exception as e:
-        return jsonify({'error': f'Error translating text: {str(e)}'}), 500
-
-
-@app.route('/api/detect-language', methods=['POST'])
-def detect_lang():
-    """
-    Detect language of text
-    
-    Returns:
-        JSON: Detected language
-    """
-    data = request.get_json()
-    text = data.get('text', '')
-    
-    if not text:
-        return jsonify({'error': 'No text provided'}), 400
-    
-    try:
-        from utils.translation import detect_language
-        language = detect_language(text)
-        lang_name = 'Tamil' if language == 'ta' else 'English'
-        return jsonify({'language': language, 'language_name': lang_name}), 200
-    except Exception as e:
-        return jsonify({'error': f'Error detecting language: {str(e)}'}), 500
 
 
 @app.route('/api/ask-question', methods=['POST'])

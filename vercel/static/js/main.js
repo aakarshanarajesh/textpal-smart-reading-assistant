@@ -28,7 +28,6 @@ const stopSpeakBtn = document.getElementById('stop-speak-btn');
 const summarizeBtn = document.getElementById('summarize-btn');
 const analyzeBtn = document.getElementById('analyze-btn');
 const keywordsBtn = document.getElementById('keywords-btn');
-const translateBtn = document.getElementById('translate-btn');
 const askBtn = document.getElementById('ask-btn');
 const clearChatBtn = document.getElementById('clear-chat-btn');
 const questionInput = document.getElementById('question-input');
@@ -90,7 +89,6 @@ stopSpeakBtn.addEventListener('click', stopReading);
 summarizeBtn.addEventListener('click', summarizeText);
 analyzeBtn.addEventListener('click', analyzeDifficulty);
 keywordsBtn.addEventListener('click', extractKeywords);
-translateBtn.addEventListener('click', translateText);
 askBtn.addEventListener('click', askQuestion);
 clearChatBtn.addEventListener('click', clearChat);
 
@@ -364,41 +362,6 @@ async function extractKeywords() {
     }
 }
 
-async function translateText() {
-    if (!currentText) {
-        showToast('No text to translate', 'error');
-        return;
-    }
-
-    showLoading(true);
-    analysisPanel.style.display = 'block';
-
-    try {
-        const data = await fetchJson(`${API_BASE}/translate`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                text: currentText,
-                target_language: 'ta'  // Translate to Tamil
-            })
-        });
-
-        // Display translation
-        document.getElementById('translation-original').textContent = data.original_text;
-        document.getElementById('translation-tamil').textContent = data.translated_text;
-        document.getElementById('translation-result').style.display = 'block';
-
-        showToast('Translation completed successfully!', 'success');
-    } catch (error) {
-        console.error('Translation error:', error);
-        showToast('Error translating text: ' + error.message, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
 // ============================================
 // Chatbot Functions
 // ============================================
@@ -474,7 +437,6 @@ function enableButtons(enable) {
     summarizeBtn.disabled = !enable;
     analyzeBtn.disabled = !enable;
     keywordsBtn.disabled = !enable;
-    translateBtn.disabled = !enable;
     questionInput.disabled = !enable;
     askBtn.disabled = !enable;
     clearChatBtn.disabled = !enable;
