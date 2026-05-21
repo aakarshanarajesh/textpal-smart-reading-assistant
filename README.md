@@ -1,293 +1,230 @@
-# Smart Reading Assistant (TextPal) 📚
+# Smart Reading Assistant (TextPal)
 
-A comprehensive web-based application designed to improve reading accessibility and comprehension through AI-powered features.
+Smart Reading Assistant, also called TextPal, is a Flask web application for reading support, document understanding, and accessibility. Users can upload PDF or TXT files, view extracted text, listen with browser text-to-speech, generate summaries, analyze reading difficulty, extract keywords, translate English text to Tamil, and ask questions about the uploaded document.
 
 ## Features
 
-### Core Features
-- **📁 File Upload**: Support for `.txt` and `.pdf` files
-- **📖 Clean Text Display**: Beautiful, readable text presentation
-- **🔊 Text-to-Speech**: Read content aloud with stop functionality
-- **📝 Summarization**: Auto-generate summaries using AI
-- **📊 Difficulty Analysis**: Calculate Flesch Reading Ease score
-- **🎨 Font Customization**: 
-  - Multiple font families (including dyslexia-friendly OpenDyslexic)
-  - Adjustable font sizes (Small, Medium, Large, Extra Large)
-  - Dark mode support
-- **💬 AI Chatbot**: Ask questions about the uploaded text
-- **🌐 Multi-language Translation**: English ↔ Tamil translation
-- **🔑 Keyword Extraction**: Identify important topics
-- **✨ Responsive UI**: Works on desktop, tablet, and mobile
+- Upload and extract text from PDF and TXT files.
+- Display document text in a clean, responsive reading interface.
+- Read content aloud with browser text-to-speech controls.
+- Generate AI summaries with Hugging Face Transformers.
+- Analyze readability with the Flesch Reading Ease score.
+- Extract important keywords from uploaded text.
+- Translate English text to Tamil.
+- Ask document-based questions through a simple QA chatbot.
+- Customize font family, font size, and dark mode.
+- Use the app on desktop, tablet, and mobile screens.
+
+## Tech Stack
+
+- Backend: Flask, Flask-CORS, Werkzeug
+- AI and NLP: Transformers, PyTorch
+- File processing: PyPDF2
+- Frontend: HTML, CSS, JavaScript
+- Browser feature: Web Speech API
+- Deployment support: Docker, Render, Vercel configuration
 
 ## Project Structure
 
-```
+```text
 smart_textpal/
-├── app.py                  # Flask backend application
-├── requirements.txt        # Python dependencies
-├── templates/
-│   └── index.html         # Main HTML template
-├── static/
-│   ├── css/
-│   │   └── style.css      # Complete styling
-│   └── js/
-│       └── main.js        # Frontend functionality
-├── utils/
-│   ├── text_extraction.py # PDF/TXT extraction
-│   ├── text_processing.py # Summarization & difficulty analysis
-│   ├── translation.py     # Language translation
-│   └── chatbot.py         # QA chatbot
-└── uploads/               # Uploaded files storage
+|-- app.py
+|-- config.py
+|-- requirements.txt
+|-- requirements-dev.txt
+|-- Procfile
+|-- runtime.txt
+|-- vercel.json
+|-- Dockerfile
+|-- docker-compose.yml
+|-- templates/
+|   `-- index.html
+|-- static/
+|   |-- css/
+|   |   `-- style.css
+|   `-- js/
+|       `-- main.js
+|-- utils/
+|   |-- chatbot.py
+|   |-- text_extraction.py
+|   |-- text_processing.py
+|   `-- translation.py
+|-- uploads/
+|   `-- .gitkeep
+|-- check_system.py
+`-- test_textpal.py
 ```
 
-## Installation & Setup
+## Local Setup
 
 ### Prerequisites
-- Python 3.8 or higher
-- pip (Python package manager)
 
-### Step 1: Clone/Download Project
+- Python 3.8 or newer
+- pip
+- Git
+
+### Install
+
 ```bash
 git clone <repository-url>
 cd smart_textpal
+python -m venv venv
 ```
 
-### Step 2: Create Virtual Environment
+Activate the virtual environment:
+
 ```bash
-# On Windows
-python -m venv venv
+# Windows
 venv\Scripts\activate
 
-# On macOS/Linux
-python3 -m venv venv
+# macOS or Linux
 source venv/bin/activate
 ```
 
-### Step 3: Install Dependencies
+Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 4: Download Required Models (Optional)
-The app will download transformer models on first use. This may take several minutes:
+Run the app:
+
+```bash
+python app.py
+```
+
+Open `http://localhost:5000` in your browser.
+
+## Optional Model Warmup
+
+The first AI request may download large model files. To warm up the main models in advance, run:
+
 ```bash
 python -c "from transformers import pipeline; pipeline('summarization', model='facebook/bart-large-cnn')"
 python -c "from transformers import pipeline; pipeline('question-answering', model='distilbert-base-cased-distilled-squad')"
 ```
 
-### Step 5: Run the Application
+## Environment Variables
+
+Copy `.env.example` to `.env` for local configuration:
+
 ```bash
-python app.py
+cp .env.example .env
 ```
 
-The application will start at `http://localhost:5000`
+Important values:
 
-## Usage Guide
-
-### 1. Upload a Document
-- Click the upload area or drag & drop a `.txt` or `.pdf` file
-- The text will be extracted and displayed in the main area
-
-### 2. Read Aloud
-- Click **"Read Aloud"** button to have the text read by the browser
-- Use **"Stop"** button to pause the reading
-- Adjust playback rate using browser speech controls
-
-### 3. Summarize Content
-- Click **"Summarize"** to generate an AI-powered summary
-- Summary appears in the analysis panel
-
-### 4. Analyze Difficulty
-- Click **"Analyze Difficulty"** to get Flesch Reading Ease score
-- Score ranges 0-100:
-  - 90-100: Very Easy
-  - 80-89: Easy
-  - 70-79: Fairly Easy
-  - 60-69: Standard
-  - 50-59: Fairly Difficult
-  - 30-49: Difficult
-  - 0-29: Very Difficult
-
-### 5. Extract Keywords
-- Click **"Extract Keywords"** to identify important topics
-- Keywords are displayed as tags
-
-### 6. Translate to Tamil
-- Click **"Translate to Tamil"** for English→Tamil translation
-- Original and translated text displayed side-by-side
-
-### 7. Ask Questions (Chatbot)
-- Type questions about the document in the chatbox
-- AI will answer based on the document content
-- Chat history is maintained during session
-
-### 8. Customize Display
-- **Font Size**: Adjust text size for readability
-- **Font Type**: Choose dyslexia-friendly or other fonts
-- **Dark Mode**: Toggle dark/light theme
+- `FLASK_ENV`: Use `development` locally and `production` in production.
+- `FLASK_DEBUG`: Use `True` locally and `False` in production.
+- `FLASK_HOST`: Defaults to `0.0.0.0`.
+- `FLASK_PORT`: Defaults to `5000`.
+- `MAX_FILE_SIZE`: Maximum upload size in bytes.
 
 ## API Endpoints
 
-### File Upload
-```
+```text
+GET  /api/health
 POST /api/upload
-- File: binary (PDF or TXT)
-- Returns: Extracted text, word count, char count
-```
-
-### Text Analysis
-```
 POST /api/analyze-difficulty
-- Body: { "text": "..." }
-- Returns: Score, level, word/sentence count
-
 POST /api/summarize
-- Body: { "text": "...", "max_length": 150, "min_length": 50 }
-- Returns: Summary text
-
 POST /api/extract-keywords
-- Body: { "text": "...", "num_keywords": 10 }
-- Returns: List of keywords
-```
-
-### Translation
-```
 POST /api/translate
-- Body: { "text": "...", "target_language": "ta" }
-- Returns: Original and translated text
-
 POST /api/detect-language
-- Body: { "text": "..." }
-- Returns: Detected language (en/ta)
-```
-
-### Chatbot
-```
 POST /api/ask-question
-- Body: { "question": "..." }
-- Returns: Answer, conversation history
-
-GET /api/chat-history
-- Returns: Conversation history
-
+GET  /api/chat-history
 POST /api/clear-chat
-- Returns: Success confirmation
 ```
 
-## Technology Stack
+## Deployment
 
-### Backend
-- **Flask**: Web framework
-- **PyPDF2**: PDF text extraction
-- **Transformers**: Hugging Face models for:
-  - Text summarization (BART)
-  - Question answering (DistilBERT)
-  - Translation (Helsinki-NLP OPUS-MT)
-- **PyTorch**: Deep learning backend
+### Recommended: Render
 
-### Frontend
-- **HTML5**: Page structure
-- **CSS3**: Responsive styling
-- **Vanilla JavaScript**: Interactivity
-- **Web Speech API**: Text-to-speech
+Render is recommended for this project because the backend uses PyTorch and Hugging Face models. These dependencies are large and need more runtime flexibility than typical serverless deployments provide.
 
-## Features Explained
+Render setup:
 
-### Flesch Reading Ease Score
-Measures text complexity based on:
-- Sentence length
-- Word length
-- Syllable count
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn app:app`
+- Python version: defined in `runtime.txt`
+- Environment: set production values such as `FLASK_ENV=production` and `FLASK_DEBUG=False`
 
-Formula: `206.835 - 1.015(words/sentences) - 84.6(syllables/words)`
+The included `Procfile` is ready for Render-style deployment.
 
-### Dyslexia-Friendly Font
-OpenDyslexic font features:
-- Unique character shapes for clarity
-- Increased letter spacing
-- Larger font heights
-- Recommended by dyslexia communities
+### Vercel
 
-### AI Summarization
-Uses Facebook's BART model to:
-- Generate abstractive summaries
-- Preserve key information
-- Adapt to requested length
+This repository includes a `vercel.json` file so Vercel can recognize the Flask app. However, deploying the full AI backend on Vercel is likely to fail or perform poorly because PyTorch and Transformer model downloads are large, cold starts are slow, and serverless functions have size and execution limits.
 
-### Question Answering
-Uses DistilBERT model to:
-- Find relevant passages
-- Generate accurate answers
-- Provide confidence scores
+Use Vercel only if:
 
-## Performance Tips
+- You deploy a lightweight version of the Flask app without heavy local models, or
+- You split the project so Vercel hosts the frontend and Render hosts the Flask API.
 
-1. **First Run**: Models will download (~2GB). Be patient!
-2. **Large Files**: Text summarization works best with 500-2000 words
-3. **Translation**: Works for English↔Tamil (other languages can be added)
-4. **Chatbot**: Best results with a 500-3000 character context
+For the current full-stack Flask app, Render is required for a reliable deployment.
+
+## Docker
+
+Build and run with Docker:
+
+```bash
+docker build -t smart-textpal .
+docker run -p 5000:5000 smart-textpal
+```
+
+Or use Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+## Usage
+
+1. Upload a `.txt` or `.pdf` document.
+2. Review the extracted text in the reader.
+3. Use summary, readability, keyword, translation, or chatbot tools.
+4. Adjust font size, font family, and dark mode for better reading comfort.
 
 ## Troubleshooting
 
-### Issue: Models not downloading
-**Solution**: 
+### Models are slow on first use
+
+The app downloads model files the first time AI features run. This can take several minutes depending on network speed.
+
+### Translation or chatbot is unavailable
+
+Check that `transformers`, `torch`, and the required model dependencies installed correctly:
+
 ```bash
-pip install --upgrade transformers torch
-python app.py
+pip install --upgrade -r requirements.txt
 ```
 
-### Issue: API connection errors
-**Solution**: Make sure Flask is running on port 5000 and CORS is enabled
+### Large PDFs fail
 
-### Issue: TTS not working
-**Solution**: 
-- Use a modern browser (Chrome, Edge, Firefox)
-- Check if speech synthesis is available in your region
+Try a smaller file or split the document. The default maximum upload size is 50 MB.
 
-### Issue: Large PDFs fail
-**Solution**: 
-- Try splitting the PDF into smaller files
-- Maximum file size is 50MB
+### Vercel deployment fails
 
-## Future Enhancements
+Use Render for the backend, or move the AI features to a hosted model API. The current local-model setup is too heavy for a typical Vercel serverless deployment.
 
-- [ ] Support for more file formats (DOCX, PPT)
-- [ ] Additional languages for translation
-- [ ] Bookmark and favorites system
-- [ ] Progress tracking and reading statistics
-- [ ] Accessibility features (ARIA labels, keyboard navigation)
-- [ ] Collaborative reading sessions
-- [ ] Mobile app version
+## Testing
 
-## System Requirements
+Run the test suite:
 
-### Minimum
-- 4GB RAM
-- 5GB disk space (for models)
-- Python 3.8+
+```bash
+pytest
+```
 
-### Recommended
-- 8GB RAM
-- GPU support (for faster processing)
-- Modern web browser
+Run the system check:
+
+```bash
+python check_system.py
+```
 
 ## License
 
-This project is open-source and available under the MIT License.
-
-## Support & Contact
-
-For issues, suggestions, or contributions, please open an issue in the repository.
+This project is open source and available under the MIT License.
 
 ## Acknowledgments
 
-- **Hugging Face**: For pre-trained models
-- **OpenDyslexic**: For dyslexia-friendly font
-- **Flask Community**: For excellent documentation
-- **Open Source Contributors**: For various libraries
-
----
-
-**Happy Reading! 📚✨**
-
-Built with ❤️ for better accessibility and comprehension.
+- Hugging Face for pre-trained NLP models.
+- OpenDyslexic for dyslexia-friendly font support.
+- Flask and the Python open-source community.
