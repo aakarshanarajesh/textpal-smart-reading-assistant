@@ -102,15 +102,13 @@ questionInput.addEventListener('keypress', (e) => {
 
 // Font customization
 fontSizeSelect.addEventListener('change', (e) => {
-    const size = e.target.value;
-    textDisplay.className = 'text-display ' + size;
-    localStorage.setItem('textSize', size);
+    localStorage.setItem('textSize', e.target.value);
+    applyReaderPreferences();
 });
 
 fontFamilySelect.addEventListener('change', (e) => {
-    const family = e.target.value;
-    textDisplay.className = 'text-display ' + family;
-    localStorage.setItem('fontFamily', family);
+    localStorage.setItem('fontFamily', e.target.value);
+    applyReaderPreferences();
 });
 
 // Dark mode toggle
@@ -118,7 +116,7 @@ darkModeToggle.addEventListener('click', () => {
     document.body.classList.toggle('dark-mode');
     const isDarkMode = document.body.classList.contains('dark-mode');
     localStorage.setItem('darkMode', isDarkMode);
-    darkModeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+    darkModeToggle.textContent = isDarkMode ? 'Light' : 'Dark';
 });
 
 // ============================================
@@ -505,6 +503,13 @@ function showToast(message, type = 'info') {
     }, 4000);
 }
 
+function applyReaderPreferences() {
+    const textSize = localStorage.getItem('textSize') || 'medium';
+    const fontFamily = localStorage.getItem('fontFamily') || 'default';
+
+    textDisplay.className = `text-display ${textSize} ${fontFamily}`;
+}
+
 // ============================================
 // Local Storage - Load Preferences
 // ============================================
@@ -514,20 +519,17 @@ function loadPreferences() {
     const isDarkMode = localStorage.getItem('darkMode') === 'true';
     if (isDarkMode) {
         document.body.classList.add('dark-mode');
-        darkModeToggle.textContent = '☀️';
     }
+    darkModeToggle.textContent = isDarkMode ? 'Light' : 'Dark';
 
     // Load text size
     const textSize = localStorage.getItem('textSize') || 'medium';
     fontSizeSelect.value = textSize;
-    textDisplay.classList.add(textSize);
 
     // Load font family
     const fontFamily = localStorage.getItem('fontFamily') || 'default';
     fontFamilySelect.value = fontFamily;
-    if (fontFamily !== 'default') {
-        textDisplay.classList.add(fontFamily);
-    }
+    applyReaderPreferences();
 }
 
 // ============================================
