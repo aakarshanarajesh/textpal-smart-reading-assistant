@@ -168,10 +168,41 @@ async function uploadFile(file) {
         showToast(`File uploaded successfully! ${data.word_count} words loaded.`, 'success');
     } catch (error) {
         console.error('Upload error:', error);
+        if (file.type === 'text/plain') {
+            try {
+                const fallbackText = await file.text();
+                loadDocumentText(file.name, fallbackText);
+                showToast('Backend is unavailable, so this text file was loaded in your browser.', 'info');
+                return;
+            } catch (fallbackError) {
+                console.error('Local text fallback error:', fallbackError);
+            }
+        }
+
         showToast('Error uploading file: ' + error.message, 'error');
     } finally {
         showLoading(false);
     }
+}
+
+function loadDocumentText(filename, text) {
+    currentText = text;
+    chatbotContextNotice();
+
+    textDisplay.textContent = currentText;
+    textDisplay.classList.remove('placeholder');
+
+    document.getElementById('current-filename').textContent = filename;
+    document.getElementById('word-count').textContent = currentText.split(/\s+/).filter(Boolean).length;
+    document.getElementById('char-count').textContent = currentText.length;
+    fileInfo.style.display = 'block';
+
+    enableButtons(true);
+}
+
+function chatbotContextNotice() {
+    chatOutput.innerHTML = '';
+    addChatMessage('The document is loaded locally. Backend features may be unavailable until the API service is back online.', 'bot');
 }
 
 // ============================================
