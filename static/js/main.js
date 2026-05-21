@@ -10,7 +10,10 @@
 let currentText = '';
 let isReading = false;
 let speechSynthesis = window.speechSynthesis;
-const API_BASE = 'http://localhost:5000/api';
+const RENDER_API_BASE = 'https://textpal-smart-reading-assistant.onrender.com/api';
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000/api'
+    : RENDER_API_BASE;
 
 // ============================================
 // DOM Elements
